@@ -28,6 +28,20 @@ APPEARANCE = {
 	"activity_type": "listening",
 	# The activity/status text to display
 	"status_text": "Listening to love letters 💌",
+	# Randomize presence at intervals up to 6 hours (defaults: 1h-6h)
+	"randomize_presence": True,
+	"presence_texts": [
+		"Listening to love letters 💌",
+		"Watching over a garden of hearts 🌷",
+		"Sending warm hugs ✨",
+		"Writing sweet notes 💌",
+	],
+	# Optional: list of activity types to pair with random texts
+	# e.g., ["listening", "watching"]
+	"activity_types": ["listening", "watching"],
+	# Seconds range for random interval (min must be <= max)
+	"presence_min_seconds": 3600,
+	"presence_max_seconds": 21600,
 	# Emoji that prefixes embed titles
 	"emoji": "💖",
 	# Optional: path to an image file to set as the bot's avatar on startup

@@ -2,6 +2,7 @@ import asyncio
 import logging
 import random
 import os
+import time
 from typing import List, Optional
 
 import discord
@@ -29,21 +30,25 @@ logging.basicConfig(
 logger = logging.getLogger("aninbot")
 
 
+def _build_activity(activity_type: str, status_text: str) -> Optional[discord.Activity]:
+    if not status_text:
+        return None
+    at = (activity_type or "listening").lower()
+    if at == "playing":
+        return discord.Game(name=status_text)
+    if at == "listening":
+        return discord.Activity(type=discord.ActivityType.listening, name=status_text)
+    if at == "watching":
+        return discord.Activity(type=discord.ActivityType.watching, name=status_text)
+    if at == "competing":
+        return discord.Activity(type=discord.ActivityType.competing, name=status_text)
+    return discord.Activity(type=discord.ActivityType.listening, name=status_text)
+
+
 def _activity_from_settings() -> Optional[discord.Activity]:
-	activity_type = (APPEARANCE or {}).get("activity_type", "listening").lower()
-	status_text = (APPEARANCE or {}).get("status_text", "Listening to love letters 💌")
-	if not status_text:
-		return None
-	if activity_type == "playing":
-		return discord.Game(name=status_text)
-	if activity_type == "listening":
-		return discord.Activity(type=discord.ActivityType.listening, name=status_text)
-	if activity_type == "watching":
-		return discord.Activity(type=discord.ActivityType.watching, name=status_text)
-	if activity_type == "competing":
-		return discord.Activity(type=discord.ActivityType.competing, name=status_text)
-	# Fallback
-	return discord.Activity(type=discord.ActivityType.listening, name=status_text)
+    activity_type = (APPEARANCE or {}).get("activity_type", "listening").lower()
+    status_text = (APPEARANCE or {}).get("status_text", "Listening to love letters 💌")
+    return _build_activity(activity_type, status_text)
 
 
 intents = discord.Intents.default()
@@ -86,6 +91,51 @@ async def on_ready():
 		logger.warning("Presence update failed: %s", e)
 	await _maybe_set_avatar_and_username()
 	logger.info("Logged in as %s (%s)", bot.user, getattr(bot.user, "id", "?"))
+    # Start background random presence updater if enabled
+	try:
+		asyncio.create_task(_presence_randomizer())
+	except Exception as e:
+		logger.warning("Failed to start presence randomizer: %s", e)
+
+
+async def _presence_randomizer():
+    """Background task to update presence at random intervals up to a max.
+
+    Controlled by APPEARANCE config keys:
+    - randomize_presence: bool
+    - presence_texts: List[str]
+    - presence_min_seconds: int (default 3600)
+    - presence_max_seconds: int (default 21600)
+    - activity_types: Optional[List[str]]
+    """
+    cfg = APPEARANCE or {}
+    if not cfg.get("randomize_presence"):
+        return
+    try:
+        min_s = int(cfg.get("presence_min_seconds", 3600))
+        max_s = int(cfg.get("presence_max_seconds", 21600))
+    except Exception:
+        min_s, max_s = 3600, 21600
+    if max_s < min_s:
+        min_s, max_s = max_s, min_s
+    if min_s < 10:
+        min_s = 10
+    texts = cfg.get("presence_texts") or [cfg.get("status_text", "Listening to love letters 💌")]
+    types = cfg.get("activity_types") or [cfg.get("activity_type", "listening")]
+    while True:
+        try:
+            text = (random.choice(texts) or "").strip()
+            act_type = (random.choice(types) or "listening").lower()
+            activity = _build_activity(act_type, text or cfg.get("status_text", "Listening to love letters 💌"))
+            await bot.change_presence(activity=activity)
+            logger.info("Presence updated: type='%s' text='%s'", act_type, text)
+        except Exception as e:
+            logger.warning("Presence randomizer failed to update: %s", e)
+        try:
+            sleep_for = random.randint(min_s, max_s)
+        except Exception:
+            sleep_for = 3600
+        await asyncio.sleep(sleep_for)
 
 
 async def _send_with_attachments(channel: discord.abc.Messageable, *, content: Optional[str], embed: Optional[discord.Embed], attachments: List[discord.Attachment]):
@@ -158,6 +208,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+	random.seed(time.time())
 	main()
 
 
