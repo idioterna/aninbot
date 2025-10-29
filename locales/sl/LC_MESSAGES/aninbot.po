@@ -1,0 +1,95 @@
+# Slovenian translations for PACKAGE package.
+# Copyright (C) 2025 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-29 09:17+0100\n"
+"PO-Revision-Date: 2025-10-29 09:17+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: sl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
+"n%100==4 ? 2 : 3);\n"
+
+#: bot.py:38
+msgid "Listening to love letters 💌"
+msgstr "Poslušam ljubezenska pisma 💌"
+
+#: bot.py:82
+#, python-format
+msgid "Could not update username: %s"
+msgstr ""
+
+#: bot.py:90
+#, python-format
+msgid "Could not update avatar: %s"
+msgstr ""
+
+#: bot.py:99
+#, python-format
+msgid "Presence update failed: %s"
+msgstr ""
+
+#: bot.py:101
+#, python-format
+msgid "Logged in as %s (%s)"
+msgstr ""
+
+#: bot.py:106
+#, python-format
+msgid "Failed to start presence randomizer: %s"
+msgstr ""
+
+#: bot.py:139
+#, python-format
+msgid "Presence updated: type='%s' text='%s'"
+msgstr ""
+
+#: bot.py:141
+#, python-format
+msgid "Presence randomizer failed to update: %s"
+msgstr ""
+
+#: bot.py:167
+msgid "Attachment links:"
+msgid_plural "Attachment links:"
+msgstr[0] "Priponka:"
+msgstr[1] "Priponki:"
+msgstr[2] "Priponke:"
+msgstr[3] "Priponk:"
+
+#: bot.py:173
+msgid "New love letter received"
+msgstr "Prispelo je novo ljubezensko pismo"
+
+#: bot.py:176
+msgid "… (truncated)"
+msgstr "… (odrezano)"
+
+#: bot.py:177
+msgid "(no text)"
+msgstr "(brez besedila)"
+
+#: bot.py:180
+msgid "Anonymous sweetheart"
+msgstr "Nikoli ne izdam, od koga je!"
+
+#: bot.py:181
+msgid "From"
+msgstr ""
+
+#: bot.py:203
+#, python-format
+msgid "Failed to fetch relay channel %s: %s"
+msgstr ""
+
+#: bot.py:214
+msgid "Please set DISCORD_TOKEN in settings.py"
+msgstr ""

@@ -84,6 +84,23 @@ Note: With Swarm bind mounts, the absolute host path must exist on the node wher
 - You can restrict who gets relayed by filling `ALLOW_LIST_USER_IDS` in `settings.py`.
 - The bot ignores messages from other bots and only relays DMs (not server messages).
 
+### Localization (gettext)
+- Runtime language is selected via `ANINBOT_LANG` environment variable (default: `en`).
+- All user-facing strings in code are marked for translation; settings values are not translated.
+- To add translations, create gettext catalogs under `locales/<lang>/LC_MESSAGES/aninbot.po`, then compile to `aninbot.mo`.
+- Example dev workflow with Babel (optional):
+  ```bash
+  pip install Babel
+  pybabel extract -F babel.cfg -o locales/aninbot.pot .
+  pybabel init -i locales/aninbot.pot -d locales -l sl
+  # edit locales/sl/LC_MESSAGES/aninbot.po
+  pybabel compile -d locales
+  ```
+  Create a simple `babel.cfg` that includes python files:
+  ```
+  [python: **.py]
+  ```
+
 ### Privacy
 Be mindful that relaying DMs shares private messages with your server moderators/team. Consider enabling anonymization and communicating this behavior clearly to your community.
 

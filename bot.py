@@ -3,6 +3,7 @@ import logging
 import random
 import os
 import time
+import gettext
 from typing import List, Optional
 
 import discord
@@ -17,10 +18,10 @@ try:
 		ANONYMIZE_SENDER,
 	)
 except Exception as exc:  # pragma: no cover - startup guard
-	raise SystemExit(
-		"Missing or invalid settings. Copy settings.py.template to settings.py and fill it in.\n"
-		f"Underlying error: {exc}"
-	)
+    raise SystemExit(
+        "Missing or invalid settings. Copy settings.py.template to settings.py and fill it in.\n"
+        f"Underlying error: {exc}"
+    )
 
 
 logging.basicConfig(
@@ -28,6 +29,13 @@ logging.basicConfig(
 	format="[%(asctime)s] [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger("aninbot")
+
+_LOCALES_DIR = os.path.join(os.path.dirname(__file__), "locales")
+_LANG = os.getenv("ANINBOT_LANG", "en")
+_TRANSLATION = gettext.translation("aninbot", localedir=_LOCALES_DIR, languages=[_LANG], fallback=True)
+_ = _TRANSLATION.gettext
+
+DEFAULT_STATUS_TEXT = _("Listening to love letters 💌")
 
 
 def _build_activity(activity_type: str, status_text: str) -> Optional[discord.Activity]:
@@ -47,7 +55,7 @@ def _build_activity(activity_type: str, status_text: str) -> Optional[discord.Ac
 
 def _activity_from_settings() -> Optional[discord.Activity]:
     activity_type = (APPEARANCE or {}).get("activity_type", "listening").lower()
-    status_text = (APPEARANCE or {}).get("status_text", "Listening to love letters 💌")
+    status_text = (APPEARANCE or {}).get("status_text", DEFAULT_STATUS_TEXT)
     return _build_activity(activity_type, status_text)
 
 
@@ -70,16 +78,16 @@ async def _maybe_set_avatar_and_username():
 		if username_override and bot.user and bot.user.name != username_override:
 			await bot.user.edit(username=username_override)
 			logger.info("Updated bot username to '%s'", username_override)
-	except Exception as e:
-		logger.warning("Could not update username: %s", e)
+    except Exception as e:
+        logger.warning(_("Could not update username: %s"), e)
 	try:
 		if avatar_path and os.path.isfile(avatar_path):
 			with open(avatar_path, "rb") as f:
 				avatar_bytes = f.read()
 			await bot.user.edit(avatar=avatar_bytes)
 			logger.info("Updated bot avatar from '%s'", avatar_path)
-	except Exception as e:
-		logger.warning("Could not update avatar: %s", e)
+    except Exception as e:
+        logger.warning(_("Could not update avatar: %s"), e)
 
 
 @bot.event
@@ -88,14 +96,14 @@ async def on_ready():
 		activity = _activity_from_settings()
 		await bot.change_presence(activity=activity, status=discord.Status.online)
 	except Exception as e:
-		logger.warning("Presence update failed: %s", e)
+        logger.warning(_("Presence update failed: %s"), e)
 	await _maybe_set_avatar_and_username()
-	logger.info("Logged in as %s (%s)", bot.user, getattr(bot.user, "id", "?"))
+    logger.info(_("Logged in as %s (%s)"), bot.user, getattr(bot.user, "id", "?"))
     # Start background random presence updater if enabled
-	try:
-		asyncio.create_task(_presence_randomizer())
-	except Exception as e:
-		logger.warning("Failed to start presence randomizer: %s", e)
+    try:
+        asyncio.create_task(_presence_randomizer())
+    except Exception as e:
+        logger.warning(_("Failed to start presence randomizer: %s"), e)
 
 
 async def _presence_randomizer():
@@ -120,17 +128,17 @@ async def _presence_randomizer():
         min_s, max_s = max_s, min_s
     if min_s < 10:
         min_s = 10
-    texts = cfg.get("presence_texts") or [cfg.get("status_text", "Listening to love letters 💌")]
+    texts = cfg.get("presence_texts") or [cfg.get("status_text", DEFAULT_STATUS_TEXT)]
     types = cfg.get("activity_types") or [cfg.get("activity_type", "listening")]
     while True:
         try:
             text = (random.choice(texts) or "").strip()
             act_type = (random.choice(types) or "listening").lower()
-            activity = _build_activity(act_type, text or cfg.get("status_text", "Listening to love letters 💌"))
+            activity = _build_activity(act_type, text or cfg.get("status_text", DEFAULT_STATUS_TEXT))
             await bot.change_presence(activity=activity)
-            logger.info("Presence updated: type='%s' text='%s'", act_type, text)
+            logger.info(_("Presence updated: type='%s' text='%s'"), act_type, text)
         except Exception as e:
-            logger.warning("Presence randomizer failed to update: %s", e)
+            logger.warning(_("Presence randomizer failed to update: %s"), e)
         try:
             sleep_for = random.randint(min_s, max_s)
         except Exception:
@@ -152,27 +160,27 @@ async def _send_with_attachments(channel: discord.abc.Messageable, *, content: O
 		logger.warning("Primary send failed (%s). Retrying without files.", e)
 		msg = await channel.send(content=content or None, embed=embed)
 		if failed or files:
-			# Fallback: send URLs of any attachments that couldn't be uploaded
-			urls = [a.url for a in failed] + [getattr(f, "url", None) for f in attachments if hasattr(f, "url")]
+            # Fallback: send URLs of any attachments that couldn't be uploaded
+            urls = [a.url for a in failed] + [getattr(f, "url", None) for f in attachments if hasattr(f, "url")]
 			urls = [u for u in urls if u]
 			if urls:
-				await channel.send("Attachment links:" + "\n" + "\n".join(urls))
+                await channel.send(_("Attachment links:") + "\n" + "\n".join(urls))
 		return msg
 
 
 def _build_embed(author: discord.User, content: str, avatar_url: Optional[str]) -> discord.Embed:
-	emoji = (APPEARANCE or {}).get("emoji") or (random.choice(ROMANTIC_EMOJIS) if ROMANTIC_EMOJIS else "💖")
-	title = f"{emoji} New love letter received"
-	desc = content.strip() if content else ""
-	if len(desc) > 4000:
-		desc = desc[:4000] + "\n… (truncated)"
-	embed = discord.Embed(title=title, description=desc or "(no text)", color=discord.Color.from_rgb(255, 105, 180))
-	if avatar_url:
-		embed.set_thumbnail(url=avatar_url)
-	sender_label = "Anonymous sweetheart" if ANONYMIZE_SENDER else f"{author} ({author.id})"
-	embed.add_field(name="From", value=sender_label, inline=False)
-	embed.set_footer(text=(random.choice(ROMANTIC_EMOJIS) if len(ROMANTIC_EMOJIS) > 1 else "🌸"))
-	return embed
+    emoji = (APPEARANCE or {}).get("emoji") or (random.choice(ROMANTIC_EMOJIS) if ROMANTIC_EMOJIS else "💖")
+    title = f"{emoji} {_('New love letter received')}"
+    desc = content.strip() if content else ""
+    if len(desc) > 4000:
+        desc = desc[:4000] + "\n" + _("… (truncated)")
+    embed = discord.Embed(title=title, description=desc or _("(no text)"), color=discord.Color.from_rgb(255, 105, 180))
+    if avatar_url:
+        embed.set_thumbnail(url=avatar_url)
+    sender_label = _("Anonymous sweetheart") if ANONYMIZE_SENDER else f"{author} ({author.id})"
+    embed.add_field(name=_("From"), value=sender_label, inline=False)
+    embed.set_footer(text=(random.choice(ROMANTIC_EMOJIS) if len(ROMANTIC_EMOJIS) > 1 else "🌸"))
+    return embed
 
 
 @bot.event
@@ -191,8 +199,8 @@ async def on_message(message: discord.Message):
 	if channel is None:
 		try:
 			channel = await bot.fetch_channel(RELAY_CHANNEL_ID)
-		except Exception as e:
-			logger.error("Failed to fetch relay channel %s: %s", RELAY_CHANNEL_ID, e)
+        except Exception as e:
+            logger.error(_("Failed to fetch relay channel %s: %s"), RELAY_CHANNEL_ID, e)
 			return
 	# Build romantic embed
 	embed = _build_embed(message.author, message.content or "",
@@ -203,7 +211,7 @@ async def on_message(message: discord.Message):
 
 def main() -> None:
 	if not DISCORD_TOKEN or DISCORD_TOKEN == "YOUR_BOT_TOKEN_HERE":
-		raise SystemExit("Please set DISCORD_TOKEN in settings.py")
+        raise SystemExit(_("Please set DISCORD_TOKEN in settings.py"))
 	bot.run(DISCORD_TOKEN)
 
 
