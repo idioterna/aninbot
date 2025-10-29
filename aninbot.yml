@@ -16,12 +16,12 @@ services:
     volumes:
       # Bind-mount local settings.py so you can edit it and restart the service
       - type: bind
-        source: /home/jure/Devel/aninbot/settings.py
+        source: ${ANINBOT_SETTINGS_PATH}
         target: /app/settings.py
         read_only: true
       # Optional: mount a folder with assets if you use APPEARANCE.avatar_path
       # - type: bind
-      #   source: /home/jure/Devel/aninbot/assets
+      #   source: ${ANINBOT_ASSETS_PATH}
       #   target: /app/assets
       #   read_only: true
 
