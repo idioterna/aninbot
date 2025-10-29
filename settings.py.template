@@ -1,0 +1,38 @@
+"""
+Copy this file to `settings.py` and fill in the values.
+
+Notes:
+- Enable the Message Content Intent for your bot in the Discord Developer Portal.
+- `RELAY_CHANNEL_ID` must be the numeric ID of the channel where DMs will be relayed.
+- Optional appearance fields allow a romantic, wholesome vibe for women-only spaces.
+"""
+
+# Required
+DISCORD_TOKEN = "YOUR_BOT_TOKEN_HERE"
+
+# The channel ID where the bot will relay received DMs
+RELAY_CHANNEL_ID = 123456789012345678  # int
+
+# Optional: restrict relays to these user IDs only (empty = allow all)
+ALLOW_LIST_USER_IDS = []  # e.g. [111111111111111111, 222222222222222222]
+
+# Optional: if True, sender identity will be anonymized in the relayed message
+ANONYMIZE_SENDER = True
+
+# Romantic flair: emojis used in embeds and messages
+ROMANTIC_EMOJIS = ["💖", "🌸", "🌷", "💌", "✨"]
+
+# Appearance configuration
+APPEARANCE = {
+	# What the bot is "doing". One of: "playing", "listening", "watching", "competing"
+	"activity_type": "listening",
+	# The activity/status text to display
+	"status_text": "Listening to love letters 💌",
+	# Emoji that prefixes embed titles
+	"emoji": "💖",
+	# Optional: path to an image file to set as the bot's avatar on startup
+	"avatar_path": "",  # e.g. "assets/romantic_avatar.png"
+	# Optional: override bot username (rate-limited by Discord)
+	"username_override": "",
+}
+

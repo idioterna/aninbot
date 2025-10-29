@@ -1,0 +1,27 @@
+version: "3.8"
+
+configs:
+  aninbot_settings.py:
+    file: ./settings.py
+
+services:
+  aninbot:
+    image: aninbot:latest
+    # Build your image first: docker build -t aninbot:latest .
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 30s
+    environment:
+      - PYTHONUNBUFFERED=1
+    configs:
+      - source: aninbot_settings.py
+        target: /app/settings.py
+        mode: 0440
+    # Optional: mount a folder with assets if you use APPEARANCE.avatar_path
+    # volumes:
+    #   - ./assets:/app/assets:ro
+
