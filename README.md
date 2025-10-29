@@ -58,15 +58,21 @@ docker run --rm -it \
    ```bash
    docker build -t aninbot:latest .
    ```
-3. Deploy the stack (make sure `settings.py` exists next to `aninbot.yml`):
+3. Deploy the stack (bind-mounts your local `settings.py`):
    ```bash
    docker stack deploy -c aninbot.yml anin
    ```
-4. Check logs:
+4. After editing `settings.py`, force a rolling restart to pick up changes:
+   ```bash
+   docker service update --force anin_aninbot
+   ```
+5. Check logs:
    ```bash
    docker service ls
    docker service logs -f anin_aninbot
    ```
+
+Note: With Swarm bind mounts, the absolute host path in `aninbot.yml` must exist on the node where the task runs. For single-node dev this is fine; in multi-node clusters, constrain placement or ensure the same path exists on all nodes.
 
 ### Notes and Tips
 - If avatar/username updates fail, it's likely due to Discord rate limits; try again later.

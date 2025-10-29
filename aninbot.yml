@@ -1,9 +1,5 @@
 version: "3.8"
 
-configs:
-  aninbot_settings.py:
-    file: ./settings.py
-
 services:
   aninbot:
     image: aninbot:latest
@@ -17,11 +13,15 @@ services:
         window: 30s
     environment:
       - PYTHONUNBUFFERED=1
-    configs:
-      - source: aninbot_settings.py
+    volumes:
+      # Bind-mount local settings.py so you can edit it and restart the service
+      - type: bind
+        source: /home/jure/Devel/aninbot/settings.py
         target: /app/settings.py
-        mode: 0440
-    # Optional: mount a folder with assets if you use APPEARANCE.avatar_path
-    # volumes:
-    #   - ./assets:/app/assets:ro
+        read_only: true
+      # Optional: mount a folder with assets if you use APPEARANCE.avatar_path
+      # - type: bind
+      #   source: /home/jure/Devel/aninbot/assets
+      #   target: /app/assets
+      #   read_only: true
 
