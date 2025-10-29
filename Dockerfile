@@ -16,7 +16,7 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # App code (settings.py is intentionally excluded; mount via Swarm config)
-COPY bot.py settings.py.template README.md ./
+COPY bot.py ./
 
 CMD ["python", "-u", "bot.py"]
 
