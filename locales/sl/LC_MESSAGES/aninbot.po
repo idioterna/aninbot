@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-29 09:17+0100\n"
+"POT-Creation-Date: 2025-10-29 09:43+0100\n"
 "PO-Revision-Date: 2025-10-29 09:17+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -58,12 +58,9 @@ msgid "Presence randomizer failed to update: %s"
 msgstr ""
 
 #: bot.py:167
+#, fuzzy
 msgid "Attachment links:"
-msgid_plural "Attachment links:"
-msgstr[0] "Priponka:"
-msgstr[1] "Priponki:"
-msgstr[2] "Priponke:"
-msgstr[3] "Priponk:"
+msgstr "Priponka:"
 
 #: bot.py:173
 msgid "New love letter received"
